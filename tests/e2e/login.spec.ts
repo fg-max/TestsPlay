@@ -1,0 +1,58 @@
+import { test, expect } from '../../fixtures/test.fixture';
+
+/**
+ * Login E2E Tests
+ *
+ * Testes end-to-end para o fluxo de login.
+ * Migrados da Orange Testing → Playwright.
+ *
+ * Convenções:
+ * - Arrange / Act / Assert
+ * - Seletores via data-test attributes
+ * - Dados parametrizados via fixtures
+ */
+
+test.describe('Login', () => {
+    test.beforeEach(async ({ loginPage }) => {
+        await loginPage.goto();
+    });
+
+    test('deve exibir o formulário de login', async ({ loginPage }) => {
+        // Assert
+        const isVisible = await loginPage.isLoginFormVisible();
+        expect(isVisible).toBeTruthy();
+    });
+
+    test('deve fazer login com credenciais válidas', async ({ loginPage, page }) => {
+        // Arrange
+        const email = process.env.TEST_USER_EMAIL || 'qa@example.com';
+        const password = process.env.TEST_USER_PASSWORD || 'password123';
+
+        // Act
+        await loginPage.login(email, password);
+
+        // Assert
+        await expect(page).toHaveURL(/dashboard/);
+    });
+
+    test('deve exibir erro com credenciais inválidas', async ({ loginPage }) => {
+        // Arrange
+        const invalidEmail = 'invalid@example.com';
+        const invalidPassword = 'wrong-password';
+
+        // Act
+        await loginPage.login(invalidEmail, invalidPassword);
+
+        // Assert
+        const errorMessage = await loginPage.getErrorMessage();
+        expect(errorMessage).toBeTruthy();
+    });
+
+    test('deve validar campos obrigatórios', async ({ loginPage, page }) => {
+        // Act — tentar login sem preencher campos
+        await loginPage.clickByTestId('login-button');
+
+        // Assert — deve permanecer na página de login
+        await expect(page).toHaveURL(/login/);
+    });
+});

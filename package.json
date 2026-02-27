@@ -1,0 +1,38 @@
+{
+  "name": "qa-automation",
+  "version": "1.0.0",
+  "description": "QA Automation framework - Playwright + TypeScript (migração Orange Testing)",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:api": "playwright test tests/api/",
+    "test:e2e": "playwright test tests/e2e/",
+    "test:visual": "playwright test tests/visual/",
+    "codegen": "playwright codegen",
+    "report": "playwright show-report",
+    "report:allure": "allure serve allure-results",
+    "lint": "eslint . --ext .ts"
+  },
+  "keywords": [
+    "qa",
+    "playwright",
+    "automation",
+    "testing",
+    "e2e"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@faker-js/faker": "^10.3.0",
+    "@playwright/test": "^1.58.2",
+    "allure-commandline": "^2.37.0",
+    "allure-playwright": "^3.5.0",
+    "dotenv": "^17.3.1",
+    "playwright-lighthouse": "^4.0.0",
+    "typescript": "^5.9.3"
+  }
+}

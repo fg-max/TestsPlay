@@ -1,0 +1,24 @@
+{
+    "users": {
+        "admin": {
+            "email": "admin@example.com",
+            "password": "Admin@123",
+            "role": "admin"
+        },
+        "student": {
+            "email": "student@example.com",
+            "password": "Student@123",
+            "role": "student"
+        },
+        "instructor": {
+            "email": "instructor@example.com",
+            "password": "Instructor@123",
+            "role": "instructor"
+        },
+        "invalidUser": {
+            "email": "invalid@example.com",
+            "password": "wrong-password",
+            "role": "none"
+        }
+    }
+}

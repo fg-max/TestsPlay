@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+
+# Allure
+allure-results/
+allure-report/
+
+# Auth state (contém tokens sensíveis)
+auth.json
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Build
+dist/
+
+# Logs
+*.log
+npm-debug.log*

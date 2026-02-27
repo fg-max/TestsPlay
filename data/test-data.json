@@ -1,0 +1,46 @@
+{
+    "users": [
+        {
+            "role": "admin",
+            "email": "admin@example.com",
+            "password": "Admin@123",
+            "name": "Admin User"
+        },
+        {
+            "role": "student",
+            "email": "student@example.com",
+            "password": "Student@123",
+            "name": "Aluno Teste"
+        },
+        {
+            "role": "instructor",
+            "email": "instructor@example.com",
+            "password": "Instructor@123",
+            "name": "Professor Teste"
+        }
+    ],
+    "courses": [
+        {
+            "id": "course-001",
+            "title": "Curso de Teste Automatizado",
+            "price": 199.90,
+            "category": "QA",
+            "status": "active"
+        },
+        {
+            "id": "course-002",
+            "title": "Curso Free para Validação",
+            "price": 0,
+            "category": "Desenvolvimento",
+            "status": "active"
+        }
+    ],
+    "meetings": [
+        {
+            "id": "meeting-001",
+            "title": "Reunião de Kick-off",
+            "date": "2026-03-01",
+            "type": "online"
+        }
+    ]
+}
