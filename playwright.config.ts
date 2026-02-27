@@ -39,9 +39,7 @@ export default defineConfig({
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
-                storageState: 'auth.json',
             },
-            dependencies: ['setup'],
         },
         // Firefox
         {
