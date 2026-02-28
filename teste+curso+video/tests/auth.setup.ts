@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/login.page';
+import { LoginPage } from '@pages/auth/login.page';
+import { userFactory } from '@data/factories/user.factory';
 
 /**
  * auth.setup.ts — Setup global de autenticação.
@@ -17,10 +18,8 @@ test('autenticar e salvar estado', async ({ page }) => {
     await loginPage.goto();
 
     // Act — login com credenciais de teste
-    await loginPage.login(
-        process.env.TEST_USER_EMAIL || 'qa@example.com',
-        process.env.TEST_USER_PASSWORD || 'password123'
-    );
+    const { email, password } = userFactory.validUser();
+    await loginPage.login(email, password);
 
     // Assert — verificar que login foi bem-sucedido
     await page.waitForURL('**/dashboard**');

@@ -1,4 +1,4 @@
-import { ApiHelper } from './api.helper';
+import { ApiHelper } from '@helpers/api.helper';
 
 /**
  * DbHelper — helpers para setup e teardown de dados de teste via Hasura.

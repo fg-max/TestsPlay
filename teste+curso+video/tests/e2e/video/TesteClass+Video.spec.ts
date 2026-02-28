@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { generateCheckoutData } from '../../helpers/fake-data.helper';
+import { generateCheckoutData } from '@helpers/fake-data.helper';
 
 // =============================================================
 // TESTE E2E: Compra de Curso Starter + Vídeo 30s + Trilha + Sair
@@ -24,6 +24,15 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
     console.log('📄 CPF     :', data.cpf);
     console.log('💳 Cartão  :', data.cardNumber);
     console.log('═'.repeat(50) + '\n');
+
+    // ══════════════════════════════════════════════════════
+    // CONFIGURAÇÃO GLOBAL
+    // Event Listener NATIVO para dialogs ("Selecione um certificado", alertas diversos)
+    // ══════════════════════════════════════════════════════
+    page.on('dialog', async dialog => {
+      console.log(`  → 🛡️ Dialog detectado: ${dialog.message()}`);
+      await dialog.accept().catch(() => { });
+    });
 
     // ══════════════════════════════════════════════════════
     // STEP 1 ─ Landing page
@@ -54,7 +63,7 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
 
       // Celular — 9 dígitos (campo já tem +55)
       const phoneInput = page.locator('input[placeholder*="Celular"], input[type="tel"]').first();
-      await phoneInput.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+      await phoneInput.waitFor({ state: 'visible', timeout: 15000 }).catch(() => { });
       if (await phoneInput.isVisible()) await phoneInput.fill(data.phone);
 
       // E-mail
@@ -100,21 +109,21 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
         console.log('  → Modal "Desbloquear oferta" detectado — preenchendo...');
 
         // Preencher dentro do modal (campos vazios)
-        const dName  = dialog.locator('input[placeholder="Primeiro Nome"]');
+        const dName = dialog.locator('input[placeholder="Primeiro Nome"]');
         const dPhone = dialog.locator('input[placeholder="Digite seu Celular"]');
         const dEmail = dialog.locator('input[placeholder="Digite seu email@aqui.com"]');
-        
-        // No modal, a página tem 3 selects — vamos pegar pelo índice DENTRO do modal
-        const dAge   = dialog.locator('select').nth(0);
-        const dS2    = dialog.locator('select').nth(1);
-        const dS3    = dialog.locator('select').nth(2);
 
-        if (await dName.isVisible({ timeout: 1000 }).catch(() => false))  await dName.fill(data.firstName);
-        if (await dAge.isVisible({ timeout: 1000 }).catch(() => false))   await dAge.selectOption({ index: 1 });
+        // No modal, a página tem 3 selects — vamos pegar pelo índice DENTRO do modal
+        const dAge = dialog.locator('select').nth(0);
+        const dS2 = dialog.locator('select').nth(1);
+        const dS3 = dialog.locator('select').nth(2);
+
+        if (await dName.isVisible({ timeout: 1000 }).catch(() => false)) await dName.fill(data.firstName);
+        if (await dAge.isVisible({ timeout: 1000 }).catch(() => false)) await dAge.selectOption({ index: 1 });
         if (await dPhone.isVisible({ timeout: 1000 }).catch(() => false)) await dPhone.fill(data.phone);
         if (await dEmail.isVisible({ timeout: 1000 }).catch(() => false)) await dEmail.fill(data.email);
-        if (await dS2.isVisible({ timeout: 1000 }).catch(() => false))    await dS2.selectOption({ index: 1 });
-        if (await dS3.isVisible({ timeout: 1000 }).catch(() => false))    await dS3.selectOption({ index: 1 });
+        if (await dS2.isVisible({ timeout: 1000 }).catch(() => false)) await dS2.selectOption({ index: 1 });
+        if (await dS3.isVisible({ timeout: 1000 }).catch(() => false)) await dS3.selectOption({ index: 1 });
 
         // Clicar em VER PREÇOS AGORA dentro do modal
         const modalSubmit = dialog.getByRole('button', { name: /ver preços agora/i });
@@ -123,7 +132,7 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
         await page.waitForTimeout(3000);
 
         // Aguardar modal fechar
-        await dialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+        await dialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => { });
         console.log('  → Modal submetido e fechado');
       } else {
         console.log('  → Sem modal — planos já visíveis');
@@ -136,7 +145,7 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
       }).first();
       // Caso haja formatação dentro do botão, fallback para includes puro:
       const safePlanCard = planCard.or(page.locator('a, button').filter({ hasText: 'GARANTIR OFERTA' }).first());
-      
+
       await safePlanCard.waitFor({ state: 'visible', timeout: 15000 });
       await safePlanCard.click();
       await page.waitForTimeout(2000);
@@ -153,32 +162,32 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
     // STEP 4.5 ─ Validar e Submeter "Seus dados" (primeira de checkout)
     // ══════════════════════════════════════════════════════
     await test.step('STEP 4.5: Submeter Seus Dados', async () => {
-       // O campo de nome pede "nome completo", mas vem do modal só com o primeiro nome
-       const preNameInputs = page.locator('input[type="text"]');
-       const count = await preNameInputs.count();
-       for (let i = 0; i < count; i++) {
-         const ph = await preNameInputs.nth(i).getAttribute('placeholder').catch(() => '');
-         const val = await preNameInputs.nth(i).inputValue().catch(() => '');
-         if ((ph?.toLowerCase().includes('nome') || true) && val === data.firstName) {
-            await preNameInputs.nth(i).fill(data.fullName);
-            console.log('  → Nome completo preenchido no pre-checkout');
-            break;
-         }
-       }
-       await page.waitForTimeout(500);
+      // O campo de nome pede "nome completo", mas vem do modal só com o primeiro nome
+      const preNameInputs = page.locator('input[type="text"]');
+      const count = await preNameInputs.count();
+      for (let i = 0; i < count; i++) {
+        const ph = await preNameInputs.nth(i).getAttribute('placeholder').catch(() => '');
+        const val = await preNameInputs.nth(i).inputValue().catch(() => '');
+        if ((ph?.toLowerCase().includes('nome') || true) && val === data.firstName) {
+          await preNameInputs.nth(i).fill(data.fullName);
+          console.log('  → Nome completo preenchido no pre-checkout');
+          break;
+        }
+      }
+      await page.waitForTimeout(500);
 
-       const contBtn1 = page.getByRole('button', { name: /continuar/i }).first();
-       if (await contBtn1.isVisible({ timeout: 5000 }).catch(() => false)) {
-         await contBtn1.click();
-         await page.waitForTimeout(2000);
-         console.log('✅ STEP 4.5: Tela Seus Dados avançada');
-       }
+      const contBtn1 = page.getByRole('button', { name: /continuar/i }).first();
+      if (await contBtn1.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await contBtn1.click();
+        await page.waitForTimeout(2000);
+        console.log('✅ STEP 4.5: Tela Seus Dados avançada');
+      }
     });    // ══════════════════════════════════════════════════════
     // STEP 5 ─ CPF no checkout
     // ID real: #cpfCnpj | placeholder: "Digite seu CPF"
     // ══════════════════════════════════════════════════════
     await test.step('STEP 5: Preencher CPF', async () => {
-      await page.getByRole('heading', { name: 'Seus dados' }).waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+      await page.getByRole('heading', { name: 'Seus dados' }).waitFor({ state: 'visible', timeout: 15000 }).catch(() => { });
 
       const cpfInput = page.locator('#cpfCnpj');
       await cpfInput.waitFor({ state: 'visible', timeout: 5000 });
@@ -209,12 +218,12 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
       const numInput = page.locator('input[placeholder*="numero"], input[placeholder*="Número"], label:has-text("Número") + div input').first();
       // Abordagem infalível: pegar pelo text "Número" mais próximo e dar fill
       if (await numInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-         await numInput.click();
-         await numInput.fill(data.number);
-         console.log('  → Número preenchido via placeholder/label');
+        await numInput.click();
+        await numInput.fill(data.number);
+        console.log('  → Número preenchido via placeholder/label');
       } else {
-         // Fallback se for estruturado de outra forma
-         await page.locator('input').filter({ hasText: /^$/ }).filter({ has: page.locator('xpath=ancestor::div[contains(@class, "MuiFormControl")]') }).nth(1).fill(data.number).catch(() => {});
+        // Fallback se for estruturado de outra forma
+        await page.locator('input').filter({ hasText: /^$/ }).filter({ has: page.locator('xpath=ancestor::div[contains(@class, "MuiFormControl")]') }).nth(1).fill(data.number).catch(() => { });
       }
 
       console.log('✅ STEP 6: Endereço preenchido. CEP:', data.cep);
@@ -289,8 +298,8 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
       for (let i = 0; i < 15; i++) {
         // Verifica se chegamos na página com input de senha (Registro)
         if (await page.locator('input[type="password"]').first().isVisible({ timeout: 1000 }).catch(() => false)) {
-             console.log('  → Página de Registro alcançada!');
-             break;
+          console.log('  → Página de Registro alcançada!');
+          break;
         }
 
         // Upsell 
@@ -311,6 +320,15 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
           continue;
         }
 
+        // Tratar Dialog OK de Certificado se cair via DOM (imagem Vercel)
+        const btnCertOk = page.getByRole('button', { name: /^ok$/i }).first();
+        if (await btnCertOk.isVisible({ timeout: 500 }).catch(() => false)) {
+          await btnCertOk.click({ force: true }).catch(() => { });
+          console.log('  → Botão OK de SSL Cert clicado pelo DOM!');
+          await page.waitForTimeout(2000);
+          continue;
+        }
+
         // Aguarda um pouco antes da próxima iteração se nada foi clicado
         await page.waitForTimeout(2000);
       }
@@ -322,86 +340,86 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
     // ══════════════════════════════════════════════════════
     await test.step('STEP 11: Preencher formulário e logar', async () => {
       console.log('  → Aguardando formulário de registro...');
-      
+
       const passInp = page.locator('input[type="password"]').first();
       // Aguarda até o input de senha aparecer ou dar timeout
-      await passInp.waitFor({ state: 'visible', timeout: 25000 }).catch(() => {});
-      
+      await passInp.waitFor({ state: 'visible', timeout: 25000 }).catch(() => { });
+
       if (await passInp.isVisible()) {
         const inpName = page.getByPlaceholder('Nome', { exact: true });
         if (await inpName.isVisible().catch(() => false)) {
-           await inpName.fill(data.firstName);
+          await inpName.fill(data.firstName);
         } else {
-           await page.locator('input[name="firstName"], input[name="user.firstName"], input#firstName, input[placeholder="Nome"]').first().fill(data.firstName).catch(()=>{});
+          await page.locator('input[name="firstName"], input[name="user.firstName"], input#firstName, input[placeholder="Nome"]').first().fill(data.firstName).catch(() => { });
         }
-        
-        await page.getByPlaceholder('Sobrenome', { exact: true }).fill(data.lastName).catch(() => {});
-        await page.getByPlaceholder('Data de nascimento').fill(data.birthDate).catch(() => {});
-        
+
+        await page.getByPlaceholder('Sobrenome', { exact: true }).fill(data.lastName).catch(() => { });
+        await page.getByPlaceholder('Data de nascimento').fill(data.birthDate).catch(() => { });
+
         // Tratar campo de Email se estiver vazio/não-disabled
         const inpEmail = page.locator('input[type="email"]').first();
-        if (await inpEmail.isVisible() && await inpEmail.isEditable().catch(()=>false)) {
+        if (await inpEmail.isVisible() && await inpEmail.isEditable().catch(() => false)) {
           const currentEmail = await inpEmail.inputValue().catch(() => '');
           if (!currentEmail || currentEmail.trim() === '') {
-             await inpEmail.fill(data.email).catch(() => {});
+            await inpEmail.fill(data.email).catch(() => { });
           }
         }
 
         // Senha e Confirmação
-        await page.getByPlaceholder('Senha', { exact: true }).fill(data.password).catch(() => {});
+        await page.getByPlaceholder('Senha', { exact: true }).fill(data.password).catch(() => { });
         const inpConfirma = page.locator('input[placeholder*="Confirme sua senha"]');
-        if (await inpConfirma.isVisible().catch(()=>false)) {
+        if (await inpConfirma.isVisible().catch(() => false)) {
           await inpConfirma.fill(data.password);
         }
 
         // Clicar "CRIAR CONTA" ou "LOGAR"
         const btnCriarConta = page.getByRole('button', { name: /criar conta/i });
         const btnLogar = page.getByRole('button', { name: /logar/i });
-        
+
         if (await btnCriarConta.isVisible().catch(() => false)) {
-           await btnCriarConta.click({ force: true });
-           console.log('  → Clicou no botão CRIAR CONTA (Role)');
-        } else if (await page.getByText('CRIAR CONTA').first().isVisible().catch(()=>false)) {
-           await page.getByText('CRIAR CONTA').first().click({ force: true });
-           console.log('  → Clicou no botão CRIAR CONTA (Text)');
+          await btnCriarConta.click({ force: true });
+          console.log('  → Clicou no botão CRIAR CONTA (Role)');
+        } else if (await page.getByText('CRIAR CONTA').first().isVisible().catch(() => false)) {
+          await page.getByText('CRIAR CONTA').first().click({ force: true });
+          console.log('  → Clicou no botão CRIAR CONTA (Text)');
         } else if (await btnLogar.isVisible().catch(() => false)) {
-           await btnLogar.click({ force: true });
+          await btnLogar.click({ force: true });
         } else {
-           // Fallback super genérico
-           await page.locator('button[type="submit"], input[type="submit"]').first().click({ force: true }).catch(() => {});
-           console.log('  → Clicou no botão de submit (Fallback)');
+          // Fallback super genérico
+          await page.locator('button[type="submit"], input[type="submit"]').first().click({ force: true }).catch(() => { });
+          console.log('  → Clicou no botão de submit (Fallback)');
         }
-        
+
         // Espera agressiva para a plataforma fazer o request e recarregar a tela:
         console.log('  → Aguardando redirecionamento inicial pós-cadastro...');
-        await page.waitForTimeout(8000); 
+        await page.waitForTimeout(8000);
 
         // Se a plataforma nos enviou para a tela de Login ("Welcome! Faça o login"), preenche e clica em ENTRAR
         const btnEntrar = page.locator('button').filter({ hasText: /^ENTRAR$/i }).first();
         if (await btnEntrar.isVisible({ timeout: 5000 }).catch(() => false)) {
-            console.log('  → Tela de login detectada após criar registro. Preenchendo credenciais...');
-            
-            const loginEmailInp = page.locator('input[placeholder*="e-mail"], input[type="email"]').first();
-            if (await loginEmailInp.isVisible().catch(() => false)) {
-                await loginEmailInp.fill(data.email);
-            }
-            
-            const loginPassInp = page.locator('input[placeholder="Senha"], input[type="password"]').first();
-            if (await loginPassInp.isVisible().catch(() => false)) {
-                await loginPassInp.fill(data.password);
-            }
-            
-            await btnEntrar.click({ force: true });
-            console.log('  → Clicou em ENTRAR no login page');
-            await page.waitForTimeout(8000); // Aguarda logar de fato
+          console.log('  → Tela de login detectada após criar registro. Preenchendo credenciais...');
+
+          const loginEmailInp = page.locator('input[placeholder*="e-mail"], input[type="email"]').first();
+          if (await loginEmailInp.isVisible().catch(() => false)) {
+            await loginEmailInp.fill(data.email);
+          }
+
+          const loginPassInp = page.locator('input[placeholder="Senha"], input[type="password"]').first();
+          if (await loginPassInp.isVisible().catch(() => false)) {
+            await loginPassInp.fill(data.password);
+          }
+
+          await btnEntrar.click({ force: true });
+          console.log('  → Clicou em ENTRAR no login page');
+          await page.waitForTimeout(8000); // Aguarda logar de fato
         }
 
         // Tenta garantir que estamos na URL certa, navegando explicitamente se não tiver redirecionado naturalmente
         const currentUrl = page.url();
         if (!currentUrl.includes('account') && !currentUrl.includes('dashboard')) {
-            console.log('⚠️ Não redirecionou automaticamente p/ Dashboard, forçando navegação para /account');
-            await page.goto('https://fluencypass-git-qa-1-idfp.vercel.app/account').catch(() => {});
-            await page.waitForTimeout(6000);
+          console.log('⚠️ Não redirecionou automaticamente p/ Dashboard, forçando navegação para /account');
+          await page.goto('https://fluencypass-git-qa-1-idfp.vercel.app/account').catch(() => { });
+          await page.waitForTimeout(6000);
         }
 
         console.log('✅ STEP 11: Formulário preenchido e fluxo de login/cadastro concluído');
@@ -472,22 +490,25 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
         await page.waitForTimeout(3000);
       }
 
-      // 8) Monitorar URL /setup/onboarding para injetar ?dev=true e pular o vídeo (Passo 5)
-      // Daremos um tempinho extra para qualquer step invisível ser pulado
-      const curUrl = page.url();
-      if (curUrl.includes('/setup/onboarding') && !curUrl.includes('dev=true')) {
-          const devUrl = curUrl.split('?')[0] + '?dev=true';
-          await page.goto(devUrl);
-          console.log(`  → Recarregou a rota com "?dev=true" para pular vídeo (${devUrl})`);
-          await page.waitForTimeout(4000);
+      // 8) Ir diretamente para a tela de Onboarding com o parâmetro DEV incluído para pular o vídeo!
+      console.log('  → [ONBOARDING] Navegando diretamente para a URL de pular vídeo...');
+      const devUrl = 'https://fluencypass-git-qa-1-idfp.vercel.app/setup/onboarding?dev=true';
+      await page.goto(devUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+      
+      console.log('  → ⏳ Parâmetro ?dev=true carregado. Aguardando EXATOS 5 SEGUNDOS...');
+      await page.waitForTimeout(5000); // 5s rígidos do prompt
 
-          // Clica em um possível "Continuar" que o dev=true abre embaixo
-          const btnContOnb = page.locator('button').filter({ hasText: /^Continuar$/i }).last();
-          if (await btnContOnb.isVisible({ timeout: 3000 }).catch(() => false)) {
-              await btnContOnb.click({ force: true });
-              console.log('  → Clicou em "Continuar" após dev=true');
-              await page.waitForTimeout(3000);
-          }
+      // Clicar no botão "Continuar" inferior (o botão liberado pelo dev=true)
+      const btnContOnb = page.locator('button').filter({ hasText: /^Continuar$/i }).last();
+      if (await btnContOnb.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await btnContOnb.click({ force: true });
+        console.log('  → ✅ SUCESSO! Clicou no botão "Continuar" do Vídeo (bypass com ?dev=true)');
+        await page.waitForTimeout(3000);
+      } else {
+        // Fallback pra xpath absoluto do botão ou classe
+        console.log('  → ⚠️ Botão Continuar não visível após 5s, testando clique de coordenada/fallback...');
+        await page.locator('button:has-text("Continuar"), button:has-text("CONTINUAR")').last().click({ force: true }).catch(() => {});
+        await page.waitForTimeout(3000);
       }
 
       // 8) Continuar na definição de horas da rotina de estudos
@@ -499,20 +520,29 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
       }
 
       // 9) Selecionar "Começar do início" / "Nunca estudei inglês"
-      const btnComecarInic = page.locator('div, h6, p').filter({ hasText: /Nunca estudei ingl/i }).first();
-      if (await btnComecarInic.isVisible({ timeout: 5000 }).catch(() => false)) {
+      const btnComecarInicAlt = page.getByText('Começar do início', { exact: true });
+      const btnComecarInic = page.locator('div, h6, p, label').filter({ hasText: /Nunca estudei ingl|Começar do início/i }).first();
+      
+      if (await btnComecarInicAlt.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await btnComecarInicAlt.click({ force: true });
+        console.log('  → Clicou no bloco "Começar do início" (Texto exato)');
+      } else if (await btnComecarInic.isVisible({ timeout: 3000 }).catch(() => false)) {
         await btnComecarInic.click({ force: true });
         console.log('  → Clicou no bloco "Nunca estudei inglês"');
-        await page.waitForTimeout(2000);
       }
+      await page.waitForTimeout(2000);
 
       // 10) Último click em "CONTINUAR" caso exista mais um passo para fechar
       const btnContinuarFinal = page.locator('button').filter({ hasText: /^Continuar$/i }).last();
-      if (await btnContinuarFinal.isVisible({ timeout: 3000 }).catch(() => false)) {
+      const btnContinuarFinalAlt = page.getByRole('button', { name: /continuar/i }).last();
+      if (await btnContinuarFinal.isVisible({ timeout: 4000 }).catch(() => false)) {
         await btnContinuarFinal.click({ force: true });
-        console.log('  → Clicou no último "CONTINUAR"');
-        await page.waitForTimeout(3000);
+        console.log('  → Clicou no último "CONTINUAR" da etapa 9');
+      } else if (await btnContinuarFinalAlt.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await btnContinuarFinalAlt.click({ force: true });
+        console.log('  → Clicou no último "CONTINUAR" da etapa 9 (Alternativo)');
       }
+      await page.waitForTimeout(3000);
 
       console.log('✅ STEP 11.5: Onboarding processado (se existente)');
     });
@@ -523,20 +553,20 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
     await test.step('STEP 12: Navegar pelo menu Meus cursos e Acessar o curso', async () => {
       // 1) Aguardar a tela principal pós-login (/account)
       console.log('  → Aguardando tela de account...');
-      await page.waitForTimeout(6000); 
+      await page.waitForTimeout(6000);
 
       // 2) Passar o mouse no "minha conta" no canto superior direito
       // O texto no header é "[Nome] \n minha conta"
       const minhaContaOption = page.locator('div, span, p').filter({ hasText: /^minha conta$/i }).first();
       // Como a área de hover pode ser o pai, vamos tentar hover na opção e no pai dela
       if (await minhaContaOption.isVisible({ timeout: 5000 }).catch(() => false)) {
-          // Hover no elemento pai para garantir que ativa o dropdown
-          await minhaContaOption.locator('..').hover({ force: true }).catch(() => minhaContaOption.hover({ force: true }));
-          console.log('  → Hover no menu "minha conta" acionado');
+        // Hover no elemento pai para garantir que ativa o dropdown
+        await minhaContaOption.locator('..').hover({ force: true }).catch(() => minhaContaOption.hover({ force: true }));
+        console.log('  → Hover no menu "minha conta" acionado');
       } else {
-          // Fallback - Canto superior direito da tela
-          const headerProfile = page.locator('header').locator('div').last();
-          if (await headerProfile.isVisible().catch(() => false)) await headerProfile.hover({ force: true });
+        // Fallback - Canto superior direito da tela
+        const headerProfile = page.locator('header').locator('div').last();
+        if (await headerProfile.isVisible().catch(() => false)) await headerProfile.hover({ force: true });
       }
 
       await page.waitForTimeout(2000); // Aguardar renderização e animação do modal dropdown
@@ -544,23 +574,23 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
       // 3) Entrar na aba "Meus cursos" pelo dropdown
       // Existe também no header fora do menu, então pegaremos a opção que estiver visível (ou preferencialmente do menu popover)
       const meusCursos = page.locator('li, a, span').filter({ hasText: /^Meus cursos$/i });
-      
+
       // Procura primeiro a opção do menu modal
       let clicked = false;
       const count = await meusCursos.count();
       for (let i = count - 1; i >= 0; i--) {
-         const el = meusCursos.nth(i);
-         if (await el.isVisible().catch(() => false)) {
-             await el.click({ force: true });
-             console.log('  → Clicou em "Meus cursos" com sucesso');
-             clicked = true;
-             break;
-         }
+        const el = meusCursos.nth(i);
+        if (await el.isVisible().catch(() => false)) {
+          await el.click({ force: true });
+          console.log('  → Clicou em "Meus cursos" com sucesso');
+          clicked = true;
+          break;
+        }
       }
 
       if (!clicked) {
         // Fallback genérico
-        await page.getByText('Meus cursos', { exact: true }).last().click({ force: true }).catch(() => {});
+        await page.getByText('Meus cursos', { exact: true }).last().click({ force: true }).catch(() => { });
         console.log('  → Clicou em "Meus cursos" (Fallback)');
       }
 
@@ -568,16 +598,16 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
 
       // 4) Botão ACESSAR O CURSO 
       const acessarCursoBtn = page.locator('button, a').filter({ hasText: /ACESSAR O CURSO/i }).first();
-      await acessarCursoBtn.waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
-      
+      await acessarCursoBtn.waitFor({ state: 'visible', timeout: 8000 }).catch(() => { });
+
       if (await acessarCursoBtn.isVisible()) {
         await acessarCursoBtn.click();
         console.log('✅ STEP 12: Clicou em "ACESSAR O CURSO" do painel de cursos');
-        await page.waitForTimeout(6000); 
+        await page.waitForTimeout(6000);
       } else {
-         console.log('⚠️ STEP 12: Botão Acessar o curso explícito não foi encontrado. Tentando localizar outro botão...');
-         const fallBackBtn = page.locator('button').filter({ hasText: /ACESSAR|INICIAR|VER/i }).first();
-         if(await fallBackBtn.isVisible()) await fallBackBtn.click();
+        console.log('⚠️ STEP 12: Botão Acessar o curso explícito não foi encontrado. Tentando localizar outro botão...');
+        const fallBackBtn = page.locator('button').filter({ hasText: /ACESSAR|INICIAR|VER/i }).first();
+        if (await fallBackBtn.isVisible()) await fallBackBtn.click();
       }
     });
 
@@ -587,20 +617,20 @@ test.describe('Fluxo Completo: Compra de Curso Starter + Vídeo', () => {
     await test.step('STEP 13: Assistir vídeo por 15s', async () => {
       const htmlVideo = page.locator('video').first();
       const iframeVideo = page.locator('iframe[src*="vimeo"], iframe[src*="youtube"]').first();
-      
+
       if (await htmlVideo.isVisible({ timeout: 3000 }).catch(() => false)) {
         console.log('🎬 Player embutido HTML5 encontrado!');
-        await htmlVideo.click().catch(() => {});
+        await htmlVideo.click().catch(() => { });
       } else if (await iframeVideo.isVisible({ timeout: 3000 }).catch(() => false)) {
         console.log('🎬 Player em Iframe encontrado!');
         const box = await iframeVideo.boundingBox();
         if (box) {
-           await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
         }
       } else {
         const genPlayBtn = page.locator('[aria-label*="Play"], button:has-text("Play")').first();
         if (await genPlayBtn.isVisible().catch(() => false)) {
-           await genPlayBtn.click();
+          await genPlayBtn.click();
         }
       }
 

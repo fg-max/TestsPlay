@@ -1,11 +1,11 @@
 import { test as base, Page } from '@playwright/test';
-import { LoginPage } from '../pages/login.page';
+import { LoginPage } from '@pages/auth/login.page';
 
 /**
  * Test Fixture — estende o test base do Playwright com objetos customizados.
  *
  * Uso nos testes:
- *   import { test, expect } from '../fixtures/test.fixture';
+ *   import { test, expect } from '@core/base.fixture';
  *
  *   test('meu teste', async ({ loginPage }) => {
  *     await loginPage.goto();

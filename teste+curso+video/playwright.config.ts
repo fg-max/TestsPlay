@@ -39,6 +39,29 @@ export default defineConfig({
             name: 'chromium',
             use: {
                 ...devices['Desktop Chrome'],
+                launchOptions: {
+                    args: [
+                        '--auto-select-client-certificate-for-urls=[{"pattern":"https://sso-qa.fluencypass.com","filter":{}}]',
+                        '--ignore-certificate-errors',
+                        '--ignore-urlfetcher-cert-requests',
+                    ],
+                },
+            },
+        },
+        // Brave
+        {
+            name: 'brave',
+            use: {
+                ...devices['Desktop Chrome'],
+                channel: 'chrome',
+                launchOptions: {
+                    executablePath: 'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+                    args: [
+                        '--auto-select-client-certificate-for-urls=[{"pattern":"https://sso-qa.fluencypass.com","filter":{}}]',
+                        '--ignore-certificate-errors',
+                        '--ignore-urlfetcher-cert-requests',
+                    ],
+                },
             },
         },
         // Firefox

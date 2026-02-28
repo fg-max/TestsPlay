@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { apiHelper } from '../../helpers/api.helper';
+import { apiHelper } from '@helpers/api.helper';
 
 /**
  * API Health Check Tests

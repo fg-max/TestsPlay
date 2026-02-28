@@ -1,4 +1,5 @@
-import { test, expect } from '../../fixtures/test.fixture';
+import { test, expect } from '@core/base.fixture';
+import { userFactory } from '@data/factories/user.factory';
 
 /**
  * Login E2E Tests
@@ -25,8 +26,7 @@ test.describe('Login', () => {
 
     test('deve fazer login com credenciais válidas', async ({ loginPage, page }) => {
         // Arrange
-        const email = process.env.TEST_USER_EMAIL || 'qa@example.com';
-        const password = process.env.TEST_USER_PASSWORD || 'password123';
+        const { email, password } = userFactory.validUser();
 
         // Act
         await loginPage.login(email, password);
@@ -37,11 +37,10 @@ test.describe('Login', () => {
 
     test('deve exibir erro com credenciais inválidas', async ({ loginPage }) => {
         // Arrange
-        const invalidEmail = 'invalid@example.com';
-        const invalidPassword = 'wrong-password';
+        const { email, password } = userFactory.invalidUser();
 
         // Act
-        await loginPage.login(invalidEmail, invalidPassword);
+        await loginPage.login(email, password);
 
         // Assert
         const errorMessage = await loginPage.getErrorMessage();

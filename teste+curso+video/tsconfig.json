@@ -14,25 +14,20 @@
         "outDir": "./dist",
         "baseUrl": ".",
         "paths": {
-            "@pages/*": [
-                "pages/*"
-            ],
-            "@fixtures/*": [
-                "fixtures/*"
-            ],
-            "@helpers/*": [
-                "helpers/*"
-            ],
-            "@data/*": [
-                "data/*"
-            ]
+            "@core/*": ["src/core/*"],
+            "@pages/*": ["src/pages/*"],
+            "@helpers/*": ["src/helpers/*"],
+            "@data/*": ["src/data/*"],
+            "@api/*": ["src/api/*"],
+            "@agent/*": [".agent/*"]
         }
     },
     "include": [
         "tests/**/*.ts",
-        "pages/**/*.ts",
-        "fixtures/**/*.ts",
-        "helpers/**/*.ts"
+        "src/**/*.ts",
+        "config/**/*.ts",
+        ".agent/**/*.ts",
+        "playwright.config.ts"
     ],
     "exclude": [
         "node_modules",
